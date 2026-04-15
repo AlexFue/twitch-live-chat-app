@@ -11,6 +11,8 @@ export default function App() {
     streamerInfo,
     inputError,
     joinChannel,
+    leaveChannel,
+    clearMessages,
   } = useChat();
 
   return (
@@ -28,6 +30,8 @@ export default function App() {
 
           <StreamerInput
             onJoin={joinChannel}
+            onLeave={leaveChannel}
+            streamerInfo={streamerInfo}
             inputError={inputError}
             isConnected={status === 'connected'}
           />
@@ -43,6 +47,9 @@ export default function App() {
       {/* Chat feed */}
       <main className="flex-1 flex flex-col overflow-hidden max-w-2xl w-full mx-auto py-2">
         <ChatFeed messages={messages} currentChannel={currentChannel} />
+        <button disabled={messages.length === 0} onClick={clearMessages} className="mt-4 self-center px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          Clear Chat
+        </button>
       </main>
     </div>
   );

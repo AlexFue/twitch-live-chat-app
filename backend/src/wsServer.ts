@@ -99,6 +99,27 @@ export function createWsServer(
             data: { channel, event: 'error', message: 'Failed to join channel' },
           });
         }
+      } else if (command.type === 'leave') {
+        // Handle leave command: browser user clicked "Stop Watching"
+        console.log('[ws] Leave request');
+        chatStore.clear();
+
+        try {
+          // Tell tmi.js to leave the current Twitch IRC channel
+          await twitchClient.leaveChannel();
+
+          // Notify all connected browsers that we left the channel
+          broadcast(wss, {
+            type: 'status',
+            data: { channel: '', event: 'parted' },
+          });
+        } catch (err) {
+          console.error('[ws] Failed to leave channel:', err);
+          send(ws, {
+            type: 'status',
+            data: { event: 'error', message: 'Failed to leave channel' },
+          } as any); // type assertion needed since channel is optional for parted event
+        }
       }
     });
 

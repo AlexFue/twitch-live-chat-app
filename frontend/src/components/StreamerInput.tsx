@@ -1,12 +1,15 @@
 import { useState, FormEvent } from 'react';
+import { StreamerInfo } from '../types';
 
 interface Props {
   onJoin: (login: string) => Promise<void>;
+  onLeave: () => void;
+  streamerInfo: StreamerInfo | null;
   inputError: string | null;
   isConnected: boolean;
 }
 
-const StreamerInput: React.FC<Props> = ({ onJoin, inputError, isConnected }: Props) => {
+const StreamerInput: React.FC<Props> = ({ onJoin, onLeave, streamerInfo, inputError, isConnected }: Props) => {
   const [value, setValue] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -60,6 +63,9 @@ const StreamerInput: React.FC<Props> = ({ onJoin, inputError, isConnected }: Pro
           ) : (
             'Watch'
           )}
+        </button>
+        <button type="button" onClick={onLeave} disabled={!isConnected || !streamerInfo} className="px-5 py-2 rounded-lg font-semibold bg-red-600 hover:bg-red-500 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          Stop Watching
         </button>
       </div>
 

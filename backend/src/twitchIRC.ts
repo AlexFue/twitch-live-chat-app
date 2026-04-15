@@ -145,4 +145,20 @@ export class TwitchIRCClient {
   getCurrentChannel(): string | null {
     return this.currentChannel;
   }
+
+  /**
+   * Leave the current Twitch IRC channel.
+   * Resets currentChannel to null.
+   */
+  async leaveChannel(): Promise<void> {
+    if (!this.currentChannel) return;
+
+    try {
+      await this.client.part(`#${this.currentChannel}`);
+      console.log(`[irc] Left #${this.currentChannel}`);
+      this.currentChannel = null;
+    } catch (err) {
+      console.error(`[irc] Error leaving channel:`, err);
+    }
+  }
 }

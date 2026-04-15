@@ -21,4 +21,4 @@ export interface StreamerInfo {
 export type WSPayload =
   | { type: 'chat';    data: ChatMessage }
   | { type: 'history'; data: ChatMessage[] }
-  | { type: 'status';  data: { channel: string; event: 'joined' | 'parted' | 'error'; message?: string } };
+  | { type: 'status';  data: { channel?: string; event: 'joined' | 'parted' | 'error'; message?: string } };

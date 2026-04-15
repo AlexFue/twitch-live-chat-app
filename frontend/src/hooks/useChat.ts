@@ -15,6 +15,7 @@ interface UseChatReturn {
   streamerInfo: StreamerInfo | null;
   inputError: string | null;
   joinChannel: (login: string) => Promise<void>;
+  leaveChannel: () => void;
   clearMessages: () => void;
 }
 
@@ -67,7 +68,11 @@ export const useChat = (): UseChatReturn => {
         setMessages(payload.data.slice(-MAX_MESSAGES));
       } else if (payload.type === 'status') {
         if (payload.data.event === 'joined') {
-          setCurrentChannel(payload.data.channel);
+          setCurrentChannel(payload.data.channel ?? null);
+        } else if (payload.data.event === 'parted') {
+          // Channel was left — clear local state
+          setCurrentChannel(null);
+          clearMessages();
         } else if (payload.data.event === 'error') {
           setInputError(payload.data.message ?? 'Failed to join channel');
         }
@@ -156,6 +161,16 @@ export const useChat = (): UseChatReturn => {
     [clearMessages]
   );
 
+  const leaveChannel = useCallback(() => {
+    setStreamerInfo(null);
+    clearMessages();
+
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      // leave the channel
+      wsRef.current.send(JSON.stringify({ type: 'leave' }))
+    }
+  }, [clearMessages]);
+
   return {
     messages,
     status,
@@ -163,6 +178,7 @@ export const useChat = (): UseChatReturn => {
     streamerInfo,
     inputError,
     joinChannel,
+    leaveChannel,
     clearMessages,
   };
 }
