@@ -1,8 +1,8 @@
-import { WebSocketServer, WebSocket } from 'ws';
-import { IncomingMessage } from 'http';
-import { WSPayload, WSCommand } from './types';
-import { chatStore } from './chatStore';
-import { TwitchIRCClient } from './twitchIRC';
+import { WebSocketServer, WebSocket } from "ws";
+import { IncomingMessage } from "http";
+import { WSPayload, WSCommand } from "./types";
+import { chatStore } from "./chatStore";
+import { TwitchIRCClient } from "./twitchIRC";
 
 /**
  * Creates and configures the WebSocket server.
@@ -23,8 +23,8 @@ import { TwitchIRCClient } from './twitchIRC';
  * @returns The WebSocket server instance
  */
 export function createWsServer(
-  server: import('http').Server,
-  twitchClient: TwitchIRCClient
+  server: import("http").Server,
+  twitchClient: TwitchIRCClient,
 ): WebSocketServer {
   // Create a WebSocket server that runs on the same port as Express
   const wss = new WebSocketServer({ server });
@@ -33,8 +33,8 @@ export function createWsServer(
    * Fires when a browser connects via WebSocket.
    * Each connection is a separate `ws` object.
    */
-  wss.on('connection', (ws: WebSocket, _req: IncomingMessage) => {
-    console.log('[ws] Client connected');
+  wss.on("connection", (ws: WebSocket, _req: IncomingMessage) => {
+    console.log("[ws] Client connected");
 
     // Send the current state to the newly connected client
     // This way, if they join a channel that's already being watched, they get recent history
@@ -42,12 +42,12 @@ export function createWsServer(
     if (currentChannel) {
       // Tell them which channel we're watching
       send(ws, {
-        type: 'status',
-        data: { channel: currentChannel, event: 'joined' },
+        type: "status",
+        data: { channel: currentChannel, event: "joined" },
       });
       // Send the last 50 messages from the buffer so they have context
       send(ws, {
-        type: 'history',
+        type: "history",
         data: chatStore.getRecent(50),
       });
     }
@@ -56,17 +56,17 @@ export function createWsServer(
      * Fires when a browser sends a message to the WebSocket.
      * The browser sends commands like { type: 'join', channel: 'pokimane' }
      */
-    ws.on('message', async (raw) => {
+    ws.on("message", async (raw) => {
       let command: WSCommand;
       try {
         command = JSON.parse(raw.toString()) as WSCommand;
       } catch {
-        console.warn('[ws] Received non-JSON message, ignoring');
+        console.warn("[ws] Received non-JSON message, ignoring");
         return;
       }
 
       // Handle the 'join' command: switch to a new channel
-      if (command.type === 'join') {
+      if (command.type === "join") {
         const channel = command.channel.toLowerCase().trim();
         if (!channel) return;
 
@@ -82,26 +82,30 @@ export function createWsServer(
 
           // Notify all connected browsers that we switched channels
           broadcast(wss, {
-            type: 'status',
-            data: { channel, event: 'joined' },
+            type: "status",
+            data: { channel, event: "joined" },
           });
 
           // Send recent messages (will be empty after clear, but good for consistency)
           broadcast(wss, {
-            type: 'history',
+            type: "history",
             data: chatStore.getRecent(50),
           });
         } catch (err) {
           console.error(`[ws] Failed to join #${channel}:`, err);
           // Tell the client there was an error
           send(ws, {
-            type: 'status',
-            data: { channel, event: 'error', message: 'Failed to join channel' },
+            type: "status",
+            data: {
+              channel,
+              event: "error",
+              message: "Failed to join channel",
+            },
           });
         }
-      } else if (command.type === 'leave') {
+      } else if (command.type === "leave") {
         // Handle leave command: browser user clicked "Stop Watching"
-        console.log('[ws] Leave request');
+        console.log("[ws] Leave request");
         chatStore.clear();
 
         try {
@@ -110,26 +114,26 @@ export function createWsServer(
 
           // Notify all connected browsers that we left the channel
           broadcast(wss, {
-            type: 'status',
-            data: { channel: '', event: 'parted' },
+            type: "status",
+            data: { channel: "", event: "parted" },
           });
         } catch (err) {
-          console.error('[ws] Failed to leave channel:', err);
+          console.error("[ws] Failed to leave channel:", err);
           send(ws, {
-            type: 'status',
-            data: { event: 'error', message: 'Failed to leave channel' },
+            type: "status",
+            data: { event: "error", message: "Failed to leave channel" },
           } as any); // type assertion needed since channel is optional for parted event
         }
       }
     });
 
     // Handle client disconnect
-    ws.on('close', () => {
-      console.log('[ws] Client disconnected');
+    ws.on("close", () => {
+      console.log("[ws] Client disconnected");
     });
 
-    ws.on('error', (err) => {
-      console.error('[ws] Client error:', err);
+    ws.on("error", (err) => {
+      console.error("[ws] Client error:", err);
     });
   });
 

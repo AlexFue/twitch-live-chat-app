@@ -1,4 +1,4 @@
-import { ChatMessage as ChatMessageType } from '../types';
+import { ChatMessage as ChatMessageType } from "../types";
 
 interface Props {
   message: ChatMessageType;
@@ -6,14 +6,14 @@ interface Props {
 
 // Badge display config: badge key → label + color classes
 const BADGE_STYLES: Record<string, { label: string; className: string }> = {
-  broadcaster: { label: 'Broadcaster', className: 'bg-red-700 text-red-100' },
-  moderator:   { label: 'Mod',         className: 'bg-green-700 text-green-100' },
-  vip:         { label: 'VIP',         className: 'bg-purple-700 text-purple-100' },
-  subscriber:  { label: 'Sub',         className: 'bg-indigo-700 text-indigo-100' },
-  staff:       { label: 'Staff',       className: 'bg-yellow-700 text-yellow-100' },
+  broadcaster: { label: "Broadcaster", className: "bg-red-700 text-red-100" },
+  moderator: { label: "Mod", className: "bg-green-700 text-green-100" },
+  vip: { label: "VIP", className: "bg-purple-700 text-purple-100" },
+  subscriber: { label: "Sub", className: "bg-indigo-700 text-indigo-100" },
+  staff: { label: "Staff", className: "bg-yellow-700 text-yellow-100" },
 };
 
-const DEFAULT_COLOR = '#9CA3AF'; // gray-400 — Twitch default for users with no color set
+const DEFAULT_COLOR = "#9CA3AF"; // gray-400 — Twitch default for users with no color set
 
 const ChatMessage: React.FC<Props> = ({ message }: Props) => {
   const usernameColor = message.color ?? DEFAULT_COLOR;
@@ -22,13 +22,13 @@ const ChatMessage: React.FC<Props> = ({ message }: Props) => {
     .filter(([key]) => key in BADGE_STYLES)
     // Sort: broadcaster first, then mod, vip, subscriber
     .sort(([a], [b]) => {
-      const order = ['broadcaster', 'moderator', 'vip', 'subscriber', 'staff'];
+      const order = ["broadcaster", "moderator", "vip", "subscriber", "staff"];
       return order.indexOf(a) - order.indexOf(b);
     });
 
   const formattedTime = new Date(message.timestamp).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
+    hour: "2-digit",
+    minute: "2-digit",
   });
 
   return (
@@ -63,10 +63,12 @@ const ChatMessage: React.FC<Props> = ({ message }: Props) => {
         </span>
 
         {/* Message text */}
-        <span className="text-gray-100 text-sm break-words">{message.text}</span>
+        <span className="text-gray-100 text-sm break-words">
+          {message.text}
+        </span>
       </div>
     </div>
   );
-}
+};
 
 export default ChatMessage;

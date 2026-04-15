@@ -1,5 +1,5 @@
-import tmi from 'tmi.js';
-import { ChatMessage } from './types';
+import tmi from "tmi.js";
+import { ChatMessage } from "./types";
 
 type MessageHandler = (msg: ChatMessage) => void;
 
@@ -42,14 +42,14 @@ export class TwitchIRCClient {
     this.client = new tmi.Client({
       options: { debug: false },
       connection: {
-        reconnect: true,  // Auto-reconnect if the connection drops
-        secure: true,     // Use wss:// (WebSocket Secure), not ws://
+        reconnect: true, // Auto-reconnect if the connection drops
+        secure: true, // Use wss:// (WebSocket Secure), not ws://
       },
       identity: {
         // Random justinfan username—Twitch allows these for read-only access
         username: `justinfan${Math.floor(Math.random() * 99999) + 1}`,
         // tmi.js uses this placeholder password for anonymous connections
-        password: 'SCHMOOPIIE',
+        password: "SCHMOOPIIE",
       },
       channels: [], // Empty for now; we'll add channels with joinChannel()
     });
@@ -58,18 +58,21 @@ export class TwitchIRCClient {
      * Message event: Fires when someone sends a message in the channel.
      * The 'message' event gives us the username, color, badges, and text.
      */
-    this.client.on('message', (_channel, tags, text, self) => {
+    this.client.on("message", (_channel, tags, text, self) => {
       // Ignore messages from our own bot account (never happens with anonymous)
       if (self) return;
 
       // Parse the Twitch message tags into our ChatMessage format
       const msg: ChatMessage = {
         // Each message gets a unique ID from Twitch
-        id: (tags['id'] as string | undefined) ?? crypto.randomUUID(),
+        id: (tags["id"] as string | undefined) ?? crypto.randomUUID(),
         // Channel name without the # (e.g., "pokimane" not "#pokimane")
-        channel: _channel.replace('#', ''),
+        channel: _channel.replace("#", ""),
         // Display name (e.g., "Pokimane") or fallback to login name
-        username: (tags['display-name'] as string | undefined) ?? tags.username ?? 'unknown',
+        username:
+          (tags["display-name"] as string | undefined) ??
+          tags.username ??
+          "unknown",
         // Hex color for the username (e.g., "#FF0000"), or null if not set
         color: (tags.color as string | undefined) ?? null,
         // The actual message text
@@ -87,7 +90,7 @@ export class TwitchIRCClient {
     /**
      * Connected event: Fired when we successfully connect to Twitch IRC.
      */
-    this.client.on('connected', (addr, port) => {
+    this.client.on("connected", (addr, port) => {
       console.log(`[irc] Connected to ${addr}:${port}`);
     });
 
@@ -95,7 +98,7 @@ export class TwitchIRCClient {
      * Disconnected event: Fired when connection drops.
      * tmi.js will auto-reconnect due to { reconnect: true } above.
      */
-    this.client.on('disconnected', (reason) => {
+    this.client.on("disconnected", (reason) => {
       console.log(`[irc] Disconnected: ${reason}`);
     });
   }

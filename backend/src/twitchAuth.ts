@@ -1,4 +1,4 @@
-import { config } from './config';
+import { config } from "./config";
 
 interface TokenResponse {
   access_token: string;
@@ -18,21 +18,23 @@ export async function getAccessToken(): Promise<string> {
   const params = new URLSearchParams({
     client_id: config.twitch.clientId,
     client_secret: config.twitch.clientSecret,
-    grant_type: 'client_credentials',
+    grant_type: "client_credentials",
   });
 
   const response = await fetch(`https://id.twitch.tv/oauth2/token?${params}`, {
-    method: 'POST',
+    method: "POST",
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch Twitch access token: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch Twitch access token: ${response.status} ${response.statusText}`,
+    );
   }
 
   const data = (await response.json()) as TokenResponse;
   cachedToken = data.access_token;
   tokenExpiresAt = Date.now() + data.expires_in * 1000;
 
-  console.log('[auth] Fetched new Twitch app access token');
+  console.log("[auth] Fetched new Twitch app access token");
   return cachedToken;
 }

@@ -1,12 +1,12 @@
-import http from 'http';
-import express from 'express';
-import cors from 'cors';
-import { config } from './config';
-import { TwitchIRCClient } from './twitchIRC';
-import { chatStore } from './chatStore';
-import { broadcast, createWsServer } from './wsServer';
-import { getAccessToken } from './twitchAuth';
-import streamsRouter from './routes/streams';
+import http from "http";
+import express from "express";
+import cors from "cors";
+import { config } from "./config";
+import { TwitchIRCClient } from "./twitchIRC";
+import { chatStore } from "./chatStore";
+import { broadcast, createWsServer } from "./wsServer";
+import { getAccessToken } from "./twitchAuth";
+import streamsRouter from "./routes/streams";
 
 /**
  * Main backend entry point.
@@ -25,12 +25,12 @@ async function main() {
   app.use(express.json());
 
   // Health check endpoint — browsers use this to verify the backend is running
-  app.get('/health', (_req, res) => {
+  app.get("/health", (_req, res) => {
     res.json({ ok: true });
   });
 
   // REST API routes — GET /api/streams?login=<name> validates streamer info
-  app.use('/api/streams', streamsRouter);
+  app.use("/api/streams", streamsRouter);
 
   // Create the HTTP server that will handle both Express and WebSocket
   // When Vite proxies REST calls to :3001, they hit this server.
@@ -44,7 +44,7 @@ async function main() {
    */
   const twitchClient = new TwitchIRCClient((msg) => {
     chatStore.push(msg); // Save message in memory ring buffer
-    broadcast(wss, { type: 'chat', data: msg }); // Send to all connected browser clients
+    broadcast(wss, { type: "chat", data: msg }); // Send to all connected browser clients
   });
 
   // Set up WebSocket server on the same HTTP server
@@ -56,8 +56,10 @@ async function main() {
   try {
     await getAccessToken();
   } catch (err) {
-    console.error('[startup] Warning: failed to pre-fetch Twitch token:', err);
-    console.error('[startup] Make sure TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET are set in backend/.env');
+    console.error("[startup] Warning: failed to pre-fetch Twitch token:", err);
+    console.error(
+      "[startup] Make sure TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET are set in backend/.env",
+    );
   }
 
   // Connect to Twitch IRC servers (wss://irc-ws.chat.twitch.tv)
@@ -66,13 +68,19 @@ async function main() {
 
   // Start the HTTP + WebSocket server
   server.listen(config.port, () => {
-    console.log(`\n[server] Backend running at http://localhost:${config.port}`);
-    console.log('[server] WebSocket available at ws://localhost:' + config.port);
-    console.log('[server] Health: http://localhost:' + config.port + '/health\n');
+    console.log(
+      `\n[server] Backend running at http://localhost:${config.port}`,
+    );
+    console.log(
+      "[server] WebSocket available at ws://localhost:" + config.port,
+    );
+    console.log(
+      "[server] Health: http://localhost:" + config.port + "/health\n",
+    );
   });
 }
 
 main().catch((err) => {
-  console.error('[startup] Fatal error:', err);
+  console.error("[startup] Fatal error:", err);
   process.exit(1);
 });

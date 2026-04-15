@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { ChatMessage as ChatMessageType } from '../types';
-import ChatMessage from './ChatMessage';
+import { useEffect, useRef, useState } from "react";
+import { ChatMessage as ChatMessageType } from "../types";
+import ChatMessage from "./ChatMessage";
 
 interface Props {
   messages: ChatMessageType[];
@@ -30,7 +30,7 @@ const ChatFeed: React.FC<Props> = ({ messages, currentChannel }: Props) => {
   }
 
   function scrollToBottom() {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     setIsPaused(false);
   }
 
@@ -38,7 +38,9 @@ const ChatFeed: React.FC<Props> = ({ messages, currentChannel }: Props) => {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-gray-500 gap-3">
         <TwitchIcon />
-        <p className="text-lg">Enter a streamer name above to start watching chat</p>
+        <p className="text-lg">
+          Enter a streamer name above to start watching chat
+        </p>
       </div>
     );
   }
@@ -71,22 +73,36 @@ const ChatFeed: React.FC<Props> = ({ messages, currentChannel }: Props) => {
             shadow-lg transition-colors flex items-center gap-2
           "
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
           Live chat
         </button>
       )}
     </div>
   );
-}
+};
 
 export default ChatFeed;
 
 const TwitchIcon: React.FC = () => {
   return (
-    <svg className="w-12 h-12 text-gray-600" viewBox="0 0 24 24" fill="currentColor">
+    <svg
+      className="w-12 h-12 text-gray-600"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
       <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" />
     </svg>
   );
-}
+};

@@ -1,5 +1,5 @@
-import { useState, FormEvent } from 'react';
-import { StreamerInfo } from '../types';
+import { useState, FormEvent } from "react";
+import { StreamerInfo } from "../types";
 
 interface Props {
   onJoin: (login: string) => Promise<void>;
@@ -9,8 +9,14 @@ interface Props {
   isConnected: boolean;
 }
 
-const StreamerInput: React.FC<Props> = ({ onJoin, onLeave, streamerInfo, inputError, isConnected }: Props) => {
-  const [value, setValue] = useState('');
+const StreamerInput: React.FC<Props> = ({
+  onJoin,
+  onLeave,
+  streamerInfo,
+  inputError,
+  isConnected,
+}: Props) => {
+  const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
@@ -61,20 +67,25 @@ const StreamerInput: React.FC<Props> = ({ onJoin, onLeave, streamerInfo, inputEr
               Joining...
             </>
           ) : (
-            'Watch'
+            "Watch"
           )}
         </button>
-        <button type="button" onClick={onLeave} disabled={!isConnected || !streamerInfo} className="px-5 py-2 rounded-lg font-semibold bg-red-600 hover:bg-red-500 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+        <button
+          type="button"
+          onClick={onLeave}
+          disabled={!isConnected ||
+
+            !streamerInfo}
+          className="px-5 py-2 rounded-lg font-semibold bg-red-600 hover:bg-red-500 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
           Stop Watching
         </button>
       </div>
 
-      {inputError && (
-        <p className="text-red-400 text-sm px-1">{inputError}</p>
-      )}
+      {inputError && <p className="text-red-400 text-sm px-1">{inputError}</p>}
     </form>
   );
-}
+};
 
 export default StreamerInput;
 
@@ -86,7 +97,14 @@ const Spinner: React.FC = () => {
       fill="none"
       viewBox="0 0 24 24"
     >
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
       <path
         className="opacity-75"
         fill="currentColor"
@@ -94,4 +112,4 @@ const Spinner: React.FC = () => {
       />
     </svg>
   );
-}
+};

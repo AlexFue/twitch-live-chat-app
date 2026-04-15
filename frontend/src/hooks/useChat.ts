@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { ChatMessage, StreamerInfo, WSPayload } from '../types';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { ChatMessage, StreamerInfo, WSPayload } from "../types";
 
-const WS_URL = 'ws://localhost:3001';
+const WS_URL = "ws://localhost:3001";
 const MAX_MESSAGES = 200; // Cap DOM messages to avoid performance issues
 const BASE_RECONNECT_DELAY = 1000;
 const MAX_RECONNECT_DELAY = 30000;
 
-export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected';
+export type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
 interface UseChatReturn {
   messages: ChatMessage[];
@@ -21,7 +21,7 @@ interface UseChatReturn {
 
 export const useChat = (): UseChatReturn => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [status, setStatus] = useState<ConnectionStatus>('connecting');
+  const [status, setStatus] = useState<ConnectionStatus>("connecting");
   const [currentChannel, setCurrentChannel] = useState<string | null>(null);
   const [streamerInfo, setStreamerInfo] = useState<StreamerInfo | null>(null);
   const [inputError, setInputError] = useState<string | null>(null);
@@ -39,13 +39,13 @@ export const useChat = (): UseChatReturn => {
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-    setStatus('connecting');
+    setStatus("connecting");
     const ws = new WebSocket(WS_URL);
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log('[ws] Connected');
-      setStatus('connected');
+      console.log("[ws] Connected");
+      setStatus("connected");
       reconnectDelay.current = BASE_RECONNECT_DELAY; // reset backoff on success
     };
 
@@ -54,34 +54,34 @@ export const useChat = (): UseChatReturn => {
       try {
         payload = JSON.parse(event.data as string) as WSPayload;
       } catch {
-        console.warn('[ws] Received non-JSON message');
+        console.warn("[ws] Received non-JSON message");
         return;
       }
 
-      if (payload.type === 'chat') {
+      if (payload.type === "chat") {
         setMessages((prev) => {
           const next = [...prev, payload.data];
           // Keep only the most recent MAX_MESSAGES messages
           return next.length > MAX_MESSAGES ? next.slice(-MAX_MESSAGES) : next;
         });
-      } else if (payload.type === 'history') {
+      } else if (payload.type === "history") {
         setMessages(payload.data.slice(-MAX_MESSAGES));
-      } else if (payload.type === 'status') {
-        if (payload.data.event === 'joined') {
+      } else if (payload.type === "status") {
+        if (payload.data.event === "joined") {
           setCurrentChannel(payload.data.channel ?? null);
-        } else if (payload.data.event === 'parted') {
+        } else if (payload.data.event === "parted") {
           // Channel was left — clear local state
           setCurrentChannel(null);
           clearMessages();
-        } else if (payload.data.event === 'error') {
-          setInputError(payload.data.message ?? 'Failed to join channel');
+        } else if (payload.data.event === "error") {
+          setInputError(payload.data.message ?? "Failed to join channel");
         }
       }
     };
 
     ws.onclose = () => {
-      console.log('[ws] Disconnected');
-      setStatus('disconnected');
+      console.log("[ws] Disconnected");
+      setStatus("disconnected");
       wsRef.current = null;
 
       if (shouldReconnect.current) {
@@ -92,13 +92,13 @@ export const useChat = (): UseChatReturn => {
         // Exponential backoff: double the delay, cap at MAX
         reconnectDelay.current = Math.min(
           reconnectDelay.current * 2,
-          MAX_RECONNECT_DELAY
+          MAX_RECONNECT_DELAY,
         );
       }
     };
 
     ws.onerror = (err) => {
-      console.error('[ws] Error:', err);
+      console.error("[ws] Error:", err);
     };
   }, []);
 
@@ -120,11 +120,13 @@ export const useChat = (): UseChatReturn => {
       // Client-side validation
       const trimmed = login.trim().toLowerCase();
       if (!trimmed) {
-        setInputError('Please enter a streamer name');
+        setInputError("Please enter a streamer name");
         return;
       }
       if (!/^[a-z0-9_]{1,25}$/.test(trimmed)) {
-        setInputError('Invalid streamer name (letters, numbers, underscores only)');
+        setInputError(
+          "Invalid streamer name (letters, numbers, underscores only)",
+        );
         return;
       }
 
@@ -133,17 +135,17 @@ export const useChat = (): UseChatReturn => {
       try {
         const res = await fetch(`/api/streams?login=${trimmed}`);
         if (res.status === 404) {
-          const body = await res.json() as { error: string };
+          const body = (await res.json()) as { error: string };
           setInputError(body.error ?? `Streamer '${login}' not found`);
           return;
         }
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        info = await res.json() as StreamerInfo;
+        info = (await res.json()) as StreamerInfo;
       } catch (err) {
-        if (err instanceof Error && err.message.startsWith('HTTP')) {
-          setInputError('Could not connect to server. Is the backend running?');
+        if (err instanceof Error && err.message.startsWith("HTTP")) {
+          setInputError("Could not connect to server. Is the backend running?");
         } else {
-          setInputError('Network error. Please try again.');
+          setInputError("Network error. Please try again.");
         }
         return;
       }
@@ -153,12 +155,14 @@ export const useChat = (): UseChatReturn => {
 
       // Send join command over WebSocket
       if (wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({ type: 'join', channel: trimmed }));
+        wsRef.current.send(JSON.stringify({ type: "join", channel: trimmed }));
       } else {
-        setInputError('Not connected to server yet. Please wait and try again.');
+        setInputError(
+          "Not connected to server yet. Please wait and try again.",
+        );
       }
     },
-    [clearMessages]
+    [clearMessages],
   );
 
   const leaveChannel = useCallback(() => {
@@ -167,7 +171,7 @@ export const useChat = (): UseChatReturn => {
 
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       // leave the channel
-      wsRef.current.send(JSON.stringify({ type: 'leave' }))
+      wsRef.current.send(JSON.stringify({ type: "leave" }));
     }
   }, [clearMessages]);
 
@@ -181,4 +185,4 @@ export const useChat = (): UseChatReturn => {
     leaveChannel,
     clearMessages,
   };
-}
+};
