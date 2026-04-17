@@ -7,7 +7,7 @@ function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) {
     throw new Error(
-      `Missing required environment variable: ${name}\nCopy .env.example to .env and fill in your Twitch credentials.`,
+      `Missing required environment variable: ${name}\n`,
     );
   }
   return value;
@@ -19,4 +19,8 @@ export const config = {
     clientId: requireEnv("TWITCH_CLIENT_ID"),
     clientSecret: requireEnv("TWITCH_CLIENT_SECRET"),
   },
+  ollama: {
+    apiUrl: requireEnv("OLLAMA_API_URL"),
+    model: requireEnv("OLLAMA_MODEL"),
+  }
 };

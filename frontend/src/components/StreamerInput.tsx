@@ -73,9 +73,7 @@ const StreamerInput: React.FC<Props> = ({
         <button
           type="button"
           onClick={onLeave}
-          disabled={!isConnected ||
-
-            !streamerInfo}
+          disabled={!isConnected}
           className="px-5 py-2 rounded-lg font-semibold bg-red-600 hover:bg-red-500 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Stop Watching

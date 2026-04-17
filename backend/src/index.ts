@@ -7,6 +7,7 @@ import { chatStore } from "./chatStore";
 import { broadcast, createWsServer } from "./wsServer";
 import { getAccessToken } from "./twitchAuth";
 import streamsRouter from "./routes/streams";
+import summarizeRouter from "./routes/summarize";
 
 /**
  * Main backend entry point.
@@ -31,6 +32,7 @@ async function main() {
 
   // REST API routes — GET /api/streams?login=<name> validates streamer info
   app.use("/api/streams", streamsRouter);
+  app.use("/api/summarize", summarizeRouter);
 
   // Create the HTTP server that will handle both Express and WebSocket
   // When Vite proxies REST calls to :3001, they hit this server.

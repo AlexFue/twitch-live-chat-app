@@ -167,7 +167,6 @@ export const useChat = (): UseChatReturn => {
 
   const leaveChannel = useCallback(() => {
     setStreamerInfo(null);
-    clearMessages();
 
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       // leave the channel
