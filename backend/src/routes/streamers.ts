@@ -2,12 +2,13 @@ import { Router, Request, Response } from "express";
 import { config } from "../config";
 import { getAccessToken } from "../twitchAuth";
 import { StreamerInfo } from "../types";
+import { addStreamer, getStreamerHistory } from "../services/streamerService";
 
 const router = Router();
 
-// GET /api/streams?login=<streamer_login>
+// GET /api/streamers/streamerExists?login=<streamer_login>
 // Returns whether a streamer exists and if they are currently live.
-router.get("/", async (req: Request, res: Response) => {
+router.get("/streamerExists", async (req: Request, res: Response) => {
   const login = (req.query.login as string | undefined)?.toLowerCase().trim();
 
   if (!login) {
@@ -79,6 +80,35 @@ router.get("/", async (req: Request, res: Response) => {
   } catch (err) {
     console.error("[streams] Error:", err);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /api/streamers
+// Returns a list of streamers the user has checked in the past, sorted by most recent
+router.get("/", async (req: Request, res: Response) => {
+  try {
+    const streamers = await getStreamerHistory();
+    res.json(streamers);
+  } catch (error) {
+    console.error('Error fetching streamers:', error);
+    res.status(500).json({ error: 'Failed to fetch streamers' });
+  }
+});
+
+// POST /api/streamers
+// Body: { username: string, displayName?: string }
+// Adds a streamer to the user's history (or updates last visited if already exists)
+router.post('/', async (req: Request, res: Response) => {
+  try {
+    const { username, displayName } = req.body;
+    if (!username) {
+      return res.status(400).json({ error: 'username is required' });
+    }
+    const streamer = await addStreamer(username, displayName);
+    res.json(streamer);
+  } catch (error) {
+    console.error('Error adding streamer:', error);
+    res.status(500).json({ error: 'Failed to add streamer' });
   }
 });
 

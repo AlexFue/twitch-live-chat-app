@@ -17,6 +17,7 @@ interface UseChatReturn {
   joinChannel: (login: string) => Promise<void>;
   leaveChannel: () => void;
   clearMessages: () => void;
+  streamerHistory: string[];
 }
 
 export const useChat = (): UseChatReturn => {
@@ -25,12 +26,30 @@ export const useChat = (): UseChatReturn => {
   const [currentChannel, setCurrentChannel] = useState<string | null>(null);
   const [streamerInfo, setStreamerInfo] = useState<StreamerInfo | null>(null);
   const [inputError, setInputError] = useState<string | null>(null);
+  const [streamerHistory, setStreamerHistory] = useState<string[]>([]);
 
   // useRef so we can access the WS in callbacks without stale closures
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectDelay = useRef(BASE_RECONNECT_DELAY);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shouldReconnect = useRef(true);
+
+  // Fetch streamer history on mount
+  useEffect(() => {
+    fetchStreamerHistory();
+  }, []);
+
+  // Fetch streamer history from the server (DB)
+  const fetchStreamerHistory = useCallback(async () => {
+    try {
+      const res = await fetch("/api/streamers/");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const streamers = await res.json()
+      setStreamerHistory(streamers.map(s => s.username));
+    } catch (err) {
+      console.error("Failed to fetch streamer history:", err);
+    }
+  }, []);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
@@ -133,7 +152,7 @@ export const useChat = (): UseChatReturn => {
       // Validate via REST — checks if streamer exists and if they're live
       let info: StreamerInfo;
       try {
-        const res = await fetch(`/api/streams?login=${trimmed}`);
+        const res = await fetch(`/api/streamers/streamerExists?login=${trimmed}`);
         if (res.status === 404) {
           const body = (await res.json()) as { error: string };
           setInputError(body.error ?? `Streamer '${login}' not found`);
@@ -150,8 +169,24 @@ export const useChat = (): UseChatReturn => {
         return;
       }
 
+      // Set streamer info and clear old messages before joining new channel
       setStreamerInfo(info);
       clearMessages();
+
+      // Save entered streamer to DB (for history) - do this before joining channel to ensure we have the display name
+      if (info) {
+        try {
+          await fetch("/api/streamers/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: trimmed, displayName: info.displayName }),
+          });
+          // Refresh history after adding new streamer
+          fetchStreamerHistory();
+        } catch (err) {
+          console.error("Failed to save streamer to DB:", err);
+        }
+      }
 
       // Send join command over WebSocket
       if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -183,5 +218,6 @@ export const useChat = (): UseChatReturn => {
     joinChannel,
     leaveChannel,
     clearMessages,
+    streamerHistory,
   };
 };

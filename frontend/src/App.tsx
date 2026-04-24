@@ -14,6 +14,7 @@ export default function App() {
     joinChannel,
     leaveChannel,
     clearMessages,
+    streamerHistory,
   } = useChat();
 
   return (
@@ -39,6 +40,7 @@ export default function App() {
             streamerInfo={streamerInfo}
             inputError={inputError}
             isConnected={status === "connected"}
+            history={streamerHistory} // Example history, replace with real data if available
           />
 
           <StatusBadge

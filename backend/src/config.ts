@@ -22,5 +22,12 @@ export const config = {
   ollama: {
     apiUrl: requireEnv("OLLAMA_API_URL"),
     model: requireEnv("OLLAMA_MODEL"),
+  },
+  database: {
+    url: requireEnv("DATABASE_URL"),
   }
 };
+
+if (!config.database.url) {
+  throw new Error("DATABASE_URL not set");
+}
